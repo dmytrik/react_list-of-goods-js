@@ -20,42 +20,34 @@ export const goodsFromServer = [
 const APLHABETFIELD = 'aplphabet';
 const LENGTHFIELD = 'length';
 
+const getVisibleGoods = (
+  sortField = '',
+  isReversed = false,
+  goods = goodsFromServer,
+) => {
+  const preparedGoods = [...goods];
+
+  if (sortField) {
+    preparedGoods.sort((good1, good2) => {
+      switch (sortField) {
+        case APLHABETFIELD:
+          return good1.localeCompare(good2);
+        case LENGTHFIELD:
+          return good1.length - good2.length;
+        default:
+          return 0;
+      }
+    });
+  }
+
+  return isReversed ? preparedGoods.reverse() : preparedGoods;
+};
+
 export const App = () => {
-  const [visibleGoods, setVisibleGoods] = useState(goodsFromServer);
   const [sortField, setSortField] = useState('');
   const [isReversed, setIsReversed] = useState(false);
 
-  const sortByAlphabetically = () => {
-    setVisibleGoods(
-      isReversed
-        ? [...visibleGoods].sort().reverse()
-        : [...visibleGoods].sort(),
-    );
-    setSortField(APLHABETFIELD);
-  };
-
-  const sortByLength = () => {
-    setVisibleGoods(
-      [...visibleGoods].sort((good1, good2) => {
-        const reversed = good2.length - good1.length;
-        const notReversed = good1.length - good2.length;
-
-        return isReversed ? reversed : notReversed;
-      }),
-    );
-    setSortField(LENGTHFIELD);
-  };
-
-  const reverseGoods = () => {
-    setVisibleGoods([...visibleGoods].reverse());
-    setIsReversed(!isReversed);
-  };
-
-  const reset = () => {
-    setVisibleGoods(goodsFromServer);
-    setSortField('');
-    setIsReversed(false);
-  };
+  const visibleGoods = getVisibleGoods(sortField, isReversed);
 
   return (
     <div className="section content">
@@ -67,7 +59,9 @@ export const App = () => {
             'is-info': true,
             'is-light': sortField !== APLHABETFIELD,
           })}
-          onClick={sortByAlphabetically}
+          onClick={() => {
+            setSortField(APLHABETFIELD);
+          }}
         >
           Sort alphabetically
         </button>
@@ -79,7 +73,7 @@ export const App = () => {
             'is-success': true,
             'is-light': sortField !== LENGTHFIELD,
           })}
-          onClick={sortByLength}
+          onClick={() => setSortField(LENGTHFIELD)}
         >
           Sort by length
         </button>
@@ -91,7 +85,7 @@ export const App = () => {
             'is-warning': true,
             'is-light': !isReversed,
           })}
-          onClick={reverseGoods}
+          onClick={() => setIsReversed(!isReversed)}
         >
           Reverse
         </button>
@@ -99,7 +93,10 @@ export const App = () => {
           <button
             type="button"
             className="button is-danger is-light"
-            onClick={reset}
+            onClick={() => {
+              setSortField('');
+              setIsReversed(false);
+            }}
           >
             Reset
           </button>
